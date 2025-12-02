@@ -63,6 +63,13 @@ export interface Video {
   description?: string;
 }
 
+export interface AISettings {
+  apiKey: string;
+  systemInstruction: string;
+  welcomeMessage: string;
+  fallbackMessage: string;
+}
+
 export interface SiteSettings {
   instituteName: string;
   instituteSubName: string;

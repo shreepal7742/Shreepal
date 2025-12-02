@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Course, StudentResult, GalleryImage, SiteSettings, FacultyMember, Video } from '../types';
-import { INITIAL_COURSES, INITIAL_STUDENTS, INITIAL_GALLERY, INITIAL_SETTINGS, INITIAL_FACULTY, INITIAL_VIDEOS } from '../data/mockData';
+import { Course, StudentResult, GalleryImage, SiteSettings, FacultyMember, Video, AISettings } from '../types';
+import { INITIAL_COURSES, INITIAL_STUDENTS, INITIAL_GALLERY, INITIAL_SETTINGS, INITIAL_FACULTY, INITIAL_VIDEOS, INITIAL_AI_SETTINGS } from '../data/mockData';
 
 interface DataContextType {
   courses: Course[];
@@ -10,6 +10,7 @@ interface DataContextType {
   siteSettings: SiteSettings;
   faculty: FacultyMember[];
   videos: Video[];
+  aiSettings: AISettings;
   
   updateCourse: (updatedCourse: Course) => void;
   
@@ -21,6 +22,7 @@ interface DataContextType {
   deleteGalleryImage: (id: string) => void;
   
   updateSiteSettings: (settings: SiteSettings) => void;
+  updateAISettings: (settings: AISettings) => void;
   
   addFaculty: (member: FacultyMember) => void;
   updateFaculty: (member: FacultyMember) => void;
@@ -100,6 +102,13 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch { return INITIAL_VIDEOS; }
   });
 
+  const [aiSettings, setAiSettings] = useState<AISettings>(() => {
+    try {
+        const saved = localStorage.getItem('mdc_ai_settings');
+        return saved ? { ...INITIAL_AI_SETTINGS, ...JSON.parse(saved) } : INITIAL_AI_SETTINGS;
+    } catch { return INITIAL_AI_SETTINGS; }
+  });
+
   // Persist to localStorage whenever state changes
   useEffect(() => saveToStorage('mdc_courses', courses), [courses]);
   useEffect(() => saveToStorage('mdc_students', students), [students]);
@@ -107,6 +116,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => saveToStorage('mdc_settings', siteSettings), [siteSettings]);
   useEffect(() => saveToStorage('mdc_faculty', faculty), [faculty]);
   useEffect(() => saveToStorage('mdc_videos', videos), [videos]);
+  useEffect(() => saveToStorage('mdc_ai_settings', aiSettings), [aiSettings]);
 
   // Actions
   const updateCourse = (updatedCourse: Course) => {
@@ -137,6 +147,10 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setSiteSettings(settings);
   };
   
+  const updateAISettings = (settings: AISettings) => {
+    setAiSettings(settings);
+  };
+  
   const addFaculty = (member: FacultyMember) => {
       setFaculty(prev => [...prev, member]);
   };
@@ -165,6 +179,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         localStorage.removeItem('mdc_settings');
         localStorage.removeItem('mdc_faculty');
         localStorage.removeItem('mdc_videos');
+        localStorage.removeItem('mdc_ai_settings');
         
         setCourses(INITIAL_COURSES);
         setStudents(INITIAL_STUDENTS);
@@ -172,6 +187,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setSiteSettings(INITIAL_SETTINGS);
         setFaculty(INITIAL_FACULTY);
         setVideos(INITIAL_VIDEOS);
+        setAiSettings(INITIAL_AI_SETTINGS);
         alert("All data has been reset!");
         window.location.reload();
     }
@@ -179,11 +195,11 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   return (
     <DataContext.Provider value={{ 
-      courses, students, galleryImages, siteSettings, faculty, videos,
+      courses, students, galleryImages, siteSettings, faculty, videos, aiSettings,
       updateCourse, 
       addStudent, updateStudent, deleteStudent, 
       addGalleryImage, deleteGalleryImage,
-      updateSiteSettings,
+      updateSiteSettings, updateAISettings,
       addFaculty, updateFaculty, deleteFaculty,
       addVideo, deleteVideo,
       resetData 

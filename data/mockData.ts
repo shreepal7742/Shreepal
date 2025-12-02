@@ -1,5 +1,5 @@
 
-import { Course, GalleryImage, StudentResult, FacultyMember, SiteSettings, Video } from "../types";
+import { Course, GalleryImage, StudentResult, FacultyMember, SiteSettings, Video, AISettings } from "../types";
 
 export const INITIAL_SETTINGS: SiteSettings = {
   instituteName: "मोहित दहिया",
@@ -41,6 +41,17 @@ export const INITIAL_SETTINGS: SiteSettings = {
   instagramUrl: "https://www.instagram.com/mohitdahiyaclasses?igsh=ZDhvcWZxNWg1Z2N5",
   youtubeUrl: "https://youtube.com/@mohitdahiyaclasses?si=WQiKZ-nfrw8MO2Sa",
   whatsappUrl: "https://www.whatsapp.com/channel/0029VaVD3eaEQIarO0vZQa29"
+};
+
+export const INITIAL_AI_SETTINGS: AISettings = {
+  apiKey: "AIzaSyCjH_j6DA6HWOqiSaK1-U5OlAZequ-jOl0",
+  systemInstruction: `आप "द्रोणा" हैं, कुचामन सिटी, राजस्थान में स्थित "मोहित दहिया क्लासेज" (MDC) के विशेषज्ञ शैक्षणिक परामर्शदाता (Academic Counselor)।
+संस्थान: प्रेरणा टॉवर, कुचामन सिटी। निदेशक: श्री मोहित दहिया।
+कोर्स: मर्चेंट नेवी (स्पेशल), SSC, रेलवे, पुलिस।
+टोन: विनम्र, उत्साहजनक और हिंदी/हिंग्लिश में। उत्तर 150 शब्दों से कम रखें।
+महत्वपूर्ण: फीस फिक्स न बताएं, विजिट करने को कहें।`,
+  welcomeMessage: "नमस्ते! मैं द्रोणा हूँ, मोहित दहिया क्लासेज का AI काउंसलर। मैं आपकी कैसे मदद कर सकता हूँ? (आप मुझसे मर्चेंट नेवी, फीस, या बैच के बारे में पूछ सकते हैं)",
+  fallbackMessage: "नमस्ते! मैं अभी सर्वर से कनेक्ट नहीं हो पा रहा हूँ, लेकिन मैं आपकी मदद कर सकता हूँ। आप मर्चेंट नेवी, SSC, फीस या हमारे पते के बारे में पूछ सकते हैं। या सीधे कॉल करें: 6376100570"
 };
 
 export const INITIAL_VIDEOS: Video[] = [

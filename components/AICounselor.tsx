@@ -1,21 +1,29 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Sparkles, Bot } from 'lucide-react';
 import { generateCounselingResponse } from '../services/geminiService';
 import { ChatMessage } from '../types';
+import { useData } from '../context/DataContext';
 
 const AICounselor: React.FC = () => {
+  const { aiSettings } = useData();
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: 'welcome',
-      role: 'model',
-      text: 'नमस्ते! मैं द्रोणा हूँ, मोहित दहिया क्लासेज का AI काउंसलर। मैं आपकी कैसे मदद कर सकता हूँ? (आप मुझसे मर्चेंट नेवी, फीस, या बैच के बारे में पूछ सकते हैं)',
-      timestamp: new Date()
-    }
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Initialize welcome message based on settings
+  useEffect(() => {
+    if (messages.length === 0) {
+        setMessages([{
+            id: 'welcome',
+            role: 'model',
+            text: aiSettings.welcomeMessage || 'नमस्ते! मैं द्रोणा हूँ। मैं आपकी कैसे मदद कर सकता हूँ?',
+            timestamp: new Date()
+        }]);
+    }
+  }, [aiSettings.welcomeMessage]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -58,7 +66,8 @@ const AICounselor: React.FC = () => {
         parts: [{ text: m.text }]
       }));
 
-      const responseText = await generateCounselingResponse(input, history);
+      // Pass the current settings to the service
+      const responseText = await generateCounselingResponse(input, history, aiSettings);
 
       const botMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),

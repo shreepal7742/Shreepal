@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
-import { Users, BookOpen, Image as ImageIcon, Trash2, Plus, Edit, LogOut, RefreshCcw, LayoutDashboard, Settings, UserCheck, UploadCloud, Save, Link as LinkIcon, Globe, MapPin, Phone, Mail, Youtube, AlignLeft, Video as VideoIcon, X, Check } from 'lucide-react';
-import { StudentResult, Course, GalleryImage, SiteSettings, FacultyMember, Video } from '../types';
+import { Users, BookOpen, Image as ImageIcon, Trash2, Plus, Edit, LogOut, RefreshCcw, LayoutDashboard, Settings, UserCheck, UploadCloud, Save, Link as LinkIcon, Globe, MapPin, Phone, Mail, Youtube, AlignLeft, Video as VideoIcon, X, Check, Bot, MessageSquare } from 'lucide-react';
+import { StudentResult, Course, GalleryImage, SiteSettings, FacultyMember, Video, AISettings } from '../types';
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -73,17 +73,17 @@ const ImageInputGroup = ({ label, namePrefix, currentImage }: { label: string, n
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   const { 
-    courses, students, galleryImages, siteSettings, faculty, videos,
+    courses, students, galleryImages, siteSettings, faculty, videos, aiSettings,
     updateCourse, 
     addStudent, updateStudent, deleteStudent, 
     addGalleryImage, deleteGalleryImage,
-    updateSiteSettings,
+    updateSiteSettings, updateAISettings,
     addFaculty, updateFaculty, deleteFaculty,
     addVideo, deleteVideo,
     resetData 
   } = useData();
 
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'settings' | 'students' | 'faculty' | 'courses' | 'gallery' | 'videos'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'settings' | 'students' | 'faculty' | 'courses' | 'gallery' | 'videos' | 'ai-settings'>('dashboard');
   
   // Edit States
   const [editingStudent, setEditingStudent] = useState<StudentResult | null>(null);
@@ -229,6 +229,21 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         alert("Error saving settings. If uploading a photo, try a smaller file.");
     }
   };
+  
+  const handleAISettingsSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      const formData = new FormData(e.currentTarget);
+      
+      const newAISettings: AISettings = {
+          apiKey: formData.get('apiKey') as string,
+          systemInstruction: formData.get('systemInstruction') as string,
+          welcomeMessage: formData.get('welcomeMessage') as string,
+          fallbackMessage: formData.get('fallbackMessage') as string,
+      };
+      
+      updateAISettings(newAISettings);
+      alert('AI Chatbot Settings Saved Successfully!');
+  };
 
   const handleVideoSubmit = (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
@@ -344,6 +359,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   const navItems = [
       { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
       { id: 'settings', label: 'Site Settings', icon: Settings },
+      { id: 'ai-settings', label: 'AI Chatbot', icon: Bot },
       { id: 'videos', label: 'Videos', icon: Youtube },
       { id: 'students', label: 'Students', icon: Users },
       { id: 'faculty', label: 'Faculty', icon: UserCheck },
@@ -443,6 +459,81 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                     </div>
                 </div>
             </div>
+        )}
+
+        {/* AI Chatbot Settings Tab */}
+        {activeTab === 'ai-settings' && (
+             <div className="animate-fade-in max-w-4xl mx-auto">
+                <header className="mb-8">
+                    <h2 className="text-3xl font-bold text-gray-900">AI Chatbot Configuration</h2>
+                    <p className="text-gray-500">Manage 'Drona' (AI Counselor) personality and API keys.</p>
+                </header>
+                
+                <form onSubmit={handleAISettingsSubmit} className="space-y-8">
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center gap-2">
+                            <Bot className="text-purple-600" size={20}/>
+                            <h3 className="font-bold text-gray-800">Core Settings</h3>
+                        </div>
+                        <div className="p-6 space-y-6">
+                             <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-2">Google Gemini API Key</label>
+                                <input 
+                                    name="apiKey" 
+                                    type="password"
+                                    defaultValue={aiSettings.apiKey} 
+                                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg font-mono text-sm"
+                                    placeholder="AIza..."
+                                />
+                                <p className="text-xs text-gray-500 mt-1">Keep this key secret. If you see errors in chat, check this key.</p>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-2">System Instructions (Personality)</label>
+                                <textarea 
+                                    name="systemInstruction" 
+                                    defaultValue={aiSettings.systemInstruction} 
+                                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg h-48 font-mono text-sm" 
+                                    placeholder="Describe how the AI should behave..."
+                                />
+                                <p className="text-xs text-gray-500 mt-1">This tells the AI who it is and how to answer.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center gap-2">
+                            <MessageSquare className="text-blue-600" size={20}/>
+                            <h3 className="font-bold text-gray-800">Messages</h3>
+                        </div>
+                        <div className="p-6 space-y-6">
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-2">Welcome Message</label>
+                                <input 
+                                    name="welcomeMessage" 
+                                    defaultValue={aiSettings.welcomeMessage} 
+                                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg" 
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-2">Fallback Message (Offline Mode)</label>
+                                <textarea 
+                                    name="fallbackMessage" 
+                                    defaultValue={aiSettings.fallbackMessage} 
+                                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg h-24" 
+                                />
+                                <p className="text-xs text-gray-500 mt-1">Shown when the API is down or quota exceeded.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-end">
+                        <button type="submit" className="bg-gradient-to-r from-orange-600 to-red-600 text-white px-8 py-4 rounded-full font-bold shadow-xl hover:shadow-2xl hover:-translate-y-1 transition transform flex items-center gap-2">
+                            <Save size={20} /> Save AI Settings
+                        </button>
+                    </div>
+                </form>
+             </div>
         )}
 
         {/* Site Settings Tab */}
