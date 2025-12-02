@@ -1,7 +1,8 @@
 
 import { GoogleGenAI } from "@google/genai";
 
-const apiKey = process.env.API_KEY || '';
+// Using the specific API key provided by the user
+const apiKey = 'AIzaSyCjH_j6DA6HWOqiSaK1-U5OlAZequ-jOl0';
 const ai = new GoogleGenAI({ apiKey });
 
 // Smart Fallback Logic for when API is down or key is invalid

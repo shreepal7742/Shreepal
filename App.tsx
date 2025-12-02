@@ -12,6 +12,7 @@ import SelectionsFullPage from './components/SelectionsFullPage';
 import Contact from './components/Contact';
 import AdminDashboard from './components/AdminDashboard';
 import VideosFullPage from './components/VideosFullPage';
+import AICounselor from './components/AICounselor';
 import { DataProvider } from './context/DataContext';
 
 function AppContent() {
@@ -115,6 +116,9 @@ function AppContent() {
       {currentView === 'videos' && (
         <VideosFullPage onBack={() => handleNavigate('home')} />
       )}
+      
+      {/* AI Counselor Chat Bot */}
+      <AICounselor />
       
     </div>
   );
