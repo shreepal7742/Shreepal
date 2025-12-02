@@ -25,6 +25,18 @@ const AICounselor: React.FC = () => {
     scrollToBottom();
   }, [messages, isOpen]);
 
+  // Prevent background scrolling when chat is open on mobile
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
@@ -66,27 +78,28 @@ const AICounselor: React.FC = () => {
   return (
     <>
       {/* Floating Action Button */}
-      <button
-        onClick={() => setIsOpen(true)}
-        className={`fixed bottom-6 right-6 z-50 p-4 rounded-full shadow-lg transition-all duration-300 hover:scale-110 ${
-          isOpen ? 'scale-0 opacity-0' : 'bg-gradient-to-r from-orange-600 to-red-600 text-white'
-        }`}
-        aria-label="Open AI Counselor"
-      >
-        <div className="relative">
-            <MessageCircle size={28} />
-            <span className="absolute -top-2 -right-2 flex h-4 w-4">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-200 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-4 w-4 bg-yellow-400 text-[10px] items-center justify-center font-bold text-orange-900">AI</span>
-            </span>
-        </div>
-      </button>
+      {!isOpen && (
+        <button
+          onClick={() => setIsOpen(true)}
+          className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 p-4 rounded-full shadow-xl transition-all duration-300 hover:scale-110 bg-gradient-to-r from-orange-600 to-red-600 text-white animate-bounce-slow"
+          aria-label="Open AI Counselor"
+        >
+          <div className="relative">
+              <MessageCircle size={28} />
+              <span className="absolute -top-2 -right-2 flex h-4 w-4">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-200 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-4 w-4 bg-yellow-400 text-[10px] items-center justify-center font-bold text-orange-900">AI</span>
+              </span>
+          </div>
+        </button>
+      )}
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 w-full max-w-sm bg-white rounded-2xl shadow-2xl border border-orange-200 overflow-hidden flex flex-col h-[500px] max-h-[80vh] transition-all animate-fade-in-up">
+        <div className="fixed inset-0 md:inset-auto md:bottom-6 md:right-6 z-[60] w-full md:w-96 h-full md:h-[550px] md:max-h-[85vh] bg-white md:rounded-2xl shadow-2xl md:border border-orange-200 flex flex-col transition-all animate-fade-in-up">
+          
           {/* Header */}
-          <div className="bg-gradient-to-r from-orange-600 to-red-600 p-4 flex justify-between items-center text-white">
+          <div className="bg-gradient-to-r from-orange-600 to-red-600 p-4 flex justify-between items-center text-white shadow-md shrink-0">
             <div className="flex items-center gap-3">
               <div className="bg-white/20 p-2 rounded-full border border-white/30">
                 <Bot size={24} />
@@ -100,21 +113,21 @@ const AICounselor: React.FC = () => {
             </div>
             <button 
               onClick={() => setIsOpen(false)}
-              className="text-white/80 hover:text-white hover:bg-white/10 p-1 rounded-full transition"
+              className="text-white/80 hover:text-white hover:bg-white/10 p-2 rounded-full transition"
             >
-              <X size={20} />
+              <X size={24} />
             </button>
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 bg-orange-50/50 space-y-4">
+          <div className="flex-1 overflow-y-auto p-4 bg-orange-50/50 space-y-4 scroll-smooth">
             {messages.map((msg) => (
               <div
                 key={msg.id}
                 className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[85%] p-3 rounded-2xl text-sm shadow-sm leading-relaxed ${
+                  className={`max-w-[85%] p-3.5 rounded-2xl text-sm shadow-sm leading-relaxed ${
                     msg.role === 'user'
                       ? 'bg-orange-600 text-white rounded-br-none'
                       : 'bg-white text-gray-800 border border-orange-100 rounded-bl-none'
@@ -136,7 +149,7 @@ const AICounselor: React.FC = () => {
           </div>
 
           {/* Input Area */}
-          <div className="p-3 bg-white border-t border-gray-100">
+          <div className="p-3 bg-white border-t border-gray-100 pb-safe shrink-0">
             <div className="flex items-center gap-2 bg-gray-50 rounded-full px-4 py-2 border border-gray-200 focus-within:border-orange-400 focus-within:ring-2 focus-within:ring-orange-100 transition">
               <input
                 type="text"
@@ -144,18 +157,18 @@ const AICounselor: React.FC = () => {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                 placeholder="अपना सवाल पूछें..."
-                className="flex-1 bg-transparent outline-none text-sm text-gray-700 placeholder-gray-400"
+                className="flex-1 bg-transparent outline-none text-base md:text-sm text-gray-700 placeholder-gray-400 h-10"
               />
               <button
                 onClick={handleSend}
                 disabled={!input.trim() || isLoading}
-                className="text-orange-600 hover:text-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-90 transition"
+                className="text-orange-600 hover:text-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-90 transition p-2"
               >
-                <Send size={20} />
+                <Send size={24} className="md:w-5 md:h-5" />
               </button>
             </div>
             <div className="text-center mt-2">
-                <p className="text-[10px] text-gray-400 font-medium">MDC Smart Support</p>
+                <p className="text-[10px] text-gray-400 font-medium pb-1 md:pb-0">MDC Smart Support</p>
             </div>
           </div>
         </div>
