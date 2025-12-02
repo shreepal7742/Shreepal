@@ -39,6 +39,11 @@ const Contact: React.FC = () => {
   // Safe check for phone property
   const dialNumbers = (siteSettings.phone || '').split('/').map(n => n.trim());
   
+  // Construct Map URL
+  const mapSrc = siteSettings.googleMapsApiKey 
+    ? `https://www.google.com/maps/embed/v1/place?key=${siteSettings.googleMapsApiKey}&q=${encodeURIComponent(siteSettings.address)}`
+    : siteSettings.mapUrl;
+
   return (
     <section id="contact" className="bg-gray-900 text-white pt-20 pb-10">
       <div className="container mx-auto px-4">
@@ -183,7 +188,7 @@ const Contact: React.FC = () => {
                     width="100%" 
                     height="100%" 
                     id="gmap_canvas" 
-                    src={siteSettings.mapUrl}
+                    src={mapSrc}
                     frameBorder="0" 
                     scrolling="no" 
                     marginHeight={0} 

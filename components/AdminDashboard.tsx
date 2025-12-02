@@ -216,6 +216,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             phone: formData.get('phone') as string,
             email: formData.get('email') as string,
             mapUrl: formData.get('mapUrl') as string,
+            googleMapsApiKey: formData.get('googleMapsApiKey') as string,
             whatsappUrl: formData.get('whatsappUrl') as string,
             instagramUrl: formData.get('instagramUrl') as string,
             youtubeUrl: formData.get('youtubeUrl') as string,
@@ -663,6 +664,40 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                         <input name="gallerySectionSubtitle" defaultValue={siteSettings.gallerySectionSubtitle} className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg" />
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Contact & Map Settings */}
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center gap-2">
+                            <MapPin className="text-green-600" size={20}/>
+                            <h3 className="font-bold text-gray-800">Contact & Location</h3>
+                        </div>
+                        <div className="p-6 space-y-6">
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-2">Address</label>
+                                <textarea name="address" defaultValue={siteSettings.address} className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg h-24" />
+                            </div>
+                            <div className="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-700 mb-2">Phone Number(s)</label>
+                                    <input name="phone" defaultValue={siteSettings.phone} placeholder="e.g. 9876543210 / 1234567890" className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-700 mb-2">Email</label>
+                                    <input name="email" defaultValue={siteSettings.email} className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg" />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-2">Google Maps Embed URL (Iframe src)</label>
+                                <input name="mapUrl" defaultValue={siteSettings.mapUrl} placeholder="https://maps.google.com/..." className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm" />
+                                <p className="text-xs text-gray-500 mt-1">Default free map link.</p>
+                            </div>
+                             <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-2">Google Maps API Key (Optional)</label>
+                                <input name="googleMapsApiKey" defaultValue={siteSettings.googleMapsApiKey} placeholder="AIza..." className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg font-mono text-sm" />
+                                <p className="text-xs text-gray-500 mt-1">If provided, we will use the official Google Maps Embed API for a better look.</p>
                             </div>
                         </div>
                     </div>

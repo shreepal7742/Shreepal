@@ -34,6 +34,7 @@ export const INITIAL_SETTINGS: SiteSettings = {
 
   address: "प्रेरणा टॉवर, जैन मंदिर के सामने, चुंगी नाका, डीडवाना रोड, जिलिया, कुचामन सिटी, नागौर, राजस्थान – 341508",
   mapUrl: "https://maps.google.com/maps?q=Prerna%20Tower%2C%20Didwana%20Road%2C%20Kuchaman%20City&t=&z=16&ie=UTF8&iwloc=&output=embed",
+  googleMapsApiKey: "", // Default empty
   phone: "6376100570 / 7597416905",
   email: "mohitkws@gmail.com",
   

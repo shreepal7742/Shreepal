@@ -100,6 +100,7 @@ export interface SiteSettings {
 
   address: string;
   mapUrl: string;
+  googleMapsApiKey?: string; // Optional API Key
   phone: string;
   email: string;
   
