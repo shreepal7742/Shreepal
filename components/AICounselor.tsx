@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Sparkles, Bot } from 'lucide-react';
+import { MessageCircle, X, Send, Sparkles, Bot, Trash2 } from 'lucide-react';
 import { generateCounselingResponse } from '../services/geminiService';
 import { ChatMessage } from '../types';
 import { useData } from '../context/DataContext';
@@ -15,7 +15,7 @@ const AICounselor: React.FC = () => {
 
   // Initialize welcome message based on settings
   useEffect(() => {
-    if (messages.length === 0) {
+    if (messages.length === 0 && isOpen) {
         setMessages([{
             id: 'welcome',
             role: 'model',
@@ -23,7 +23,7 @@ const AICounselor: React.FC = () => {
             timestamp: new Date()
         }]);
     }
-  }, [aiSettings.welcomeMessage]);
+  }, [aiSettings.welcomeMessage, isOpen]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -31,7 +31,7 @@ const AICounselor: React.FC = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, isOpen]);
+  }, [messages, isOpen, isLoading]);
 
   // Prevent background scrolling when chat is open on mobile
   useEffect(() => {
@@ -84,6 +84,25 @@ const AICounselor: React.FC = () => {
     }
   };
 
+  const handleClearChat = () => {
+    if (window.confirm("क्या आप पुरानी चैट मिटाना चाहते हैं?")) {
+        setMessages([{
+            id: Date.now().toString(),
+            role: 'model',
+            text: aiSettings.welcomeMessage || 'नमस्ते! मैं द्रोणा हूँ। मैं आपकी कैसे मदद कर सकता हूँ?',
+            timestamp: new Date()
+        }]);
+    }
+  };
+
+  const formatTime = (date: Date) => {
+    return new Intl.DateTimeFormat('en-US', {
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: true,
+    }).format(new Date(date));
+  };
+
   return (
     <>
       {/* Floating Action Button */}
@@ -105,7 +124,7 @@ const AICounselor: React.FC = () => {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed inset-0 md:inset-auto md:bottom-6 md:right-6 z-[60] w-full md:w-96 h-full md:h-[550px] md:max-h-[85vh] bg-white md:rounded-2xl shadow-2xl md:border border-orange-200 flex flex-col transition-all animate-fade-in-up">
+        <div className="fixed inset-0 md:inset-auto md:bottom-6 md:right-6 z-[60] w-full md:w-96 h-full md:h-[600px] md:max-h-[85vh] bg-white md:rounded-2xl shadow-2xl md:border border-orange-200 flex flex-col transition-all animate-fade-in-up">
           
           {/* Header */}
           <div className="bg-gradient-to-r from-orange-600 to-red-600 p-4 flex justify-between items-center text-white shadow-md shrink-0">
@@ -120,12 +139,21 @@ const AICounselor: React.FC = () => {
                 </p>
               </div>
             </div>
-            <button 
-              onClick={() => setIsOpen(false)}
-              className="text-white/80 hover:text-white hover:bg-white/10 p-2 rounded-full transition"
-            >
-              <X size={24} />
-            </button>
+            <div className="flex items-center gap-1">
+                <button 
+                  onClick={handleClearChat}
+                  className="text-white/80 hover:text-white hover:bg-white/10 p-2 rounded-full transition"
+                  title="Clear Chat"
+                >
+                  <Trash2 size={18} />
+                </button>
+                <button 
+                  onClick={() => setIsOpen(false)}
+                  className="text-white/80 hover:text-white hover:bg-white/10 p-2 rounded-full transition"
+                >
+                  <X size={24} />
+                </button>
+            </div>
           </div>
 
           {/* Messages */}
@@ -136,13 +164,18 @@ const AICounselor: React.FC = () => {
                 className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[85%] p-3.5 rounded-2xl text-sm shadow-sm leading-relaxed ${
+                  className={`max-w-[85%] p-3.5 rounded-2xl text-sm shadow-sm leading-relaxed relative group ${
                     msg.role === 'user'
                       ? 'bg-orange-600 text-white rounded-br-none'
                       : 'bg-white text-gray-800 border border-orange-100 rounded-bl-none'
                   }`}
                 >
-                  {msg.text}
+                  <p>{msg.text}</p>
+                  <p className={`text-[10px] mt-1 text-right font-medium opacity-70 ${
+                      msg.role === 'user' ? 'text-orange-100' : 'text-gray-400'
+                  }`}>
+                      {formatTime(msg.timestamp)}
+                  </p>
                 </div>
               </div>
             ))}
@@ -177,7 +210,7 @@ const AICounselor: React.FC = () => {
               </button>
             </div>
             <div className="text-center mt-2">
-                <p className="text-[10px] text-gray-400 font-medium pb-1 md:pb-0">MDC Smart Support</p>
+                <p className="text-[10px] text-gray-400 font-medium pb-1 md:pb-0">MDC Smart Support • AI Response</p>
             </div>
           </div>
         </div>

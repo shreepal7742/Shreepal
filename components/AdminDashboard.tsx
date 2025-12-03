@@ -76,7 +76,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     courses, students, galleryImages, siteSettings, faculty, videos, aiSettings,
     updateCourse, 
     addStudent, updateStudent, deleteStudent, 
-    addGalleryImage, deleteGalleryImage,
+    addGalleryImage, updateGalleryImage, deleteGalleryImage,
     updateSiteSettings, updateAISettings,
     addFaculty, updateFaculty, deleteFaculty,
     addVideo, deleteVideo,
@@ -89,6 +89,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   const [editingStudent, setEditingStudent] = useState<StudentResult | null>(null);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [editingFaculty, setEditingFaculty] = useState<FacultyMember | null>(null);
+  const [editingGalleryImage, setEditingGalleryImage] = useState<GalleryImage | null>(null);
   
   // New Item States
   const [isAddingStudent, setIsAddingStudent] = useState(false);
@@ -340,21 +341,28 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     const formData = new FormData(e.currentTarget);
     const file = formData.get('galleryFile') as File;
     const url = formData.get('galleryUrl') as string;
-    let imageUrl = 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=800&q=80';
+    let imageUrl = editingGalleryImage?.url || 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=800&q=80';
     try {
         if (file && file.size > 0) imageUrl = await handleFileUpload(file);
         else if (url && url.trim() !== '') imageUrl = transformImageUrl(url);
 
         const newImage: GalleryImage = {
-            id: Date.now().toString(),
+            id: editingGalleryImage ? editingGalleryImage.id : Date.now().toString(),
             title: formData.get('title') as string,
             subtitle: formData.get('subtitle') as string,
             url: imageUrl
         };
-        addGalleryImage(newImage);
-        setIsAddingImage(false);
-        alert("Photo added!");
-    } catch (error) { alert("Error adding photo."); }
+        
+        if (editingGalleryImage) {
+            updateGalleryImage(newImage);
+            setEditingGalleryImage(null);
+            alert("Photo updated!");
+        } else {
+            addGalleryImage(newImage);
+            setIsAddingImage(false);
+            alert("Photo added!");
+        }
+    } catch (error) { alert("Error saving photo."); }
   };
 
   const navItems = [
@@ -861,7 +869,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         <h2 className="text-2xl font-bold text-gray-800">Photo Gallery</h2>
                         <p className="text-gray-500">Upload campus photos.</p>
                     </div>
-                    <button onClick={() => setIsAddingImage(true)} className="bg-orange-600 text-white px-6 py-3 rounded-xl flex items-center gap-2 hover:bg-orange-700 transition font-bold shadow-md">
+                    <button onClick={() => { setEditingGalleryImage(null); setIsAddingImage(true); }} className="bg-orange-600 text-white px-6 py-3 rounded-xl flex items-center gap-2 hover:bg-orange-700 transition font-bold shadow-md">
                         <Plus size={20} /> Add Photo
                     </button>
                 </div>
@@ -870,6 +878,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         <div key={img.id} className="group relative aspect-square rounded-xl overflow-hidden shadow-sm bg-gray-200">
                             <img src={img.url} alt={img.title} className="w-full h-full object-cover transition duration-500 group-hover:scale-110" />
                             <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                <button onClick={() => { setEditingGalleryImage(img); setIsAddingImage(true); }} className="bg-white text-blue-500 p-2 rounded-full hover:bg-blue-50"><Edit size={20}/></button>
                                 <button onClick={() => deleteGalleryImage(img.id)} className="bg-white text-red-500 p-2 rounded-full hover:bg-red-50"><Trash2 size={20}/></button>
                             </div>
                             <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent text-white text-xs font-bold truncate">
@@ -1006,16 +1015,18 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         {isAddingImage && (
             <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                 <div className="bg-white rounded-2xl max-w-lg w-full p-8 shadow-2xl">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-6">Add Photo</h3>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-6">{editingGalleryImage ? 'Edit Photo' : 'Add Photo'}</h3>
                     <form onSubmit={handleImageSubmit} className="space-y-4">
-                        <input name="title" placeholder="Title" required className="w-full p-3 border rounded-lg" />
-                        <input name="subtitle" placeholder="Subtitle" required className="w-full p-3 border rounded-lg" />
+                        <input name="title" defaultValue={editingGalleryImage?.title} placeholder="Title" required className="w-full p-3 border rounded-lg" />
+                        <input name="subtitle" defaultValue={editingGalleryImage?.subtitle} placeholder="Subtitle" required className="w-full p-3 border rounded-lg" />
                         
-                        <ImageInputGroup label="Select Photo" namePrefix="gallery" />
+                        <ImageInputGroup label="Select Photo" namePrefix="gallery" currentImage={editingGalleryImage?.url} />
 
                         <div className="flex gap-4 pt-4">
                             <button type="button" onClick={() => setIsAddingImage(false)} className="px-6 py-3 border rounded-lg font-bold">Cancel</button>
-                            <button type="submit" className="flex-1 bg-orange-600 text-white rounded-lg font-bold hover:bg-orange-700">Add Photo</button>
+                            <button type="submit" className="flex-1 bg-orange-600 text-white rounded-lg font-bold hover:bg-orange-700">
+                                {editingGalleryImage ? 'Update Photo' : 'Add Photo'}
+                            </button>
                         </div>
                     </form>
                 </div>

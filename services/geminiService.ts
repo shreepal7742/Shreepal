@@ -2,6 +2,9 @@
 import { GoogleGenAI } from "@google/genai";
 import { AISettings } from "../types";
 
+// The user provided specific key for this instance
+const HARDCODED_KEY = "AIzaSyCjH_j6DA6HWOqiSaK1-U5OlAZequ-jOl0";
+
 // Smart Fallback Logic for when API is down or key is invalid
 const getFallbackResponse = (message: string, fallbackMessage?: string): string => {
   const lowerMsg = message.toLowerCase();
@@ -35,16 +38,17 @@ export const generateCounselingResponse = async (
   settings: AISettings
 ): Promise<string> => {
   
-  const apiKey = settings.apiKey;
+  // Priority: 1. Admin Settings Key -> 2. Environment Variable -> 3. Hardcoded Key (User Provided)
+  const apiKey = settings.apiKey || process.env.API_KEY || HARDCODED_KEY;
 
-  // 1. If no API key, use fallback immediately to avoid crash
+  // 1. If no API key found at all, use fallback immediately to avoid crash
   if (!apiKey) {
     console.warn("API Key missing, using fallback.");
     return getFallbackResponse(userMessage, settings.fallbackMessage);
   }
 
   try {
-    // Initialize AI with the provided key (or default)
+    // Initialize AI with the resolved key
     const ai = new GoogleGenAI({ apiKey });
     const model = 'gemini-2.5-flash';
     

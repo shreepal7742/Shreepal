@@ -19,6 +19,7 @@ interface DataContextType {
   deleteStudent: (id: string) => void;
   
   addGalleryImage: (image: GalleryImage) => void;
+  updateGalleryImage: (image: GalleryImage) => void;
   deleteGalleryImage: (id: string) => void;
   
   updateSiteSettings: (settings: SiteSettings) => void;
@@ -139,6 +140,10 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setGalleryImages(prev => [image, ...prev]);
   };
 
+  const updateGalleryImage = (image: GalleryImage) => {
+    setGalleryImages(prev => prev.map(img => img.id === image.id ? image : img));
+  };
+
   const deleteGalleryImage = (id: string) => {
     setGalleryImages(prev => prev.filter(img => img.id !== id));
   };
@@ -198,7 +203,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       courses, students, galleryImages, siteSettings, faculty, videos, aiSettings,
       updateCourse, 
       addStudent, updateStudent, deleteStudent, 
-      addGalleryImage, deleteGalleryImage,
+      addGalleryImage, updateGalleryImage, deleteGalleryImage,
       updateSiteSettings, updateAISettings,
       addFaculty, updateFaculty, deleteFaculty,
       addVideo, deleteVideo,
