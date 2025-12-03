@@ -108,4 +108,9 @@ export interface SiteSettings {
   instagramUrl?: string;
   youtubeUrl?: string;
   whatsappUrl?: string;
+
+  // GitHub Cloud Storage Config
+  githubToken?: string;
+  githubOwner?: string;
+  githubRepo?: string;
 }

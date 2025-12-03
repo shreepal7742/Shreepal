@@ -41,7 +41,12 @@ export const INITIAL_SETTINGS: SiteSettings = {
   facebookUrl: "",
   instagramUrl: "https://www.instagram.com/mohitdahiyaclasses?igsh=ZDhvcWZxNWg1Z2N5",
   youtubeUrl: "https://youtube.com/@mohitdahiyaclasses?si=WQiKZ-nfrw8MO2Sa",
-  whatsappUrl: "https://www.whatsapp.com/channel/0029VaVD3eaEQIarO0vZQa29"
+  whatsappUrl: "https://www.whatsapp.com/channel/0029VaVD3eaEQIarO0vZQa29",
+
+  // GitHub Config Defaults
+  githubToken: "",
+  githubOwner: "",
+  githubRepo: ""
 };
 
 export const INITIAL_AI_SETTINGS: AISettings = {
