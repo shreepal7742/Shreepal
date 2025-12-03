@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Course, StudentResult, GalleryImage, SiteSettings, FacultyMember, Video, AISettings } from '../types';
 import { INITIAL_COURSES, INITIAL_STUDENTS, INITIAL_GALLERY, INITIAL_SETTINGS, INITIAL_FACULTY, INITIAL_VIDEOS, INITIAL_AI_SETTINGS } from '../data/mockData';
+import { saveJsonToGitHub } from '../services/githubService';
 
 interface DataContextType {
   courses: Course[];
@@ -33,6 +34,10 @@ interface DataContextType {
   deleteVideo: (id: string) => void;
   
   resetData: () => void;
+  
+  // Publish Logic
+  publishToLiveSite: () => Promise<void>;
+  isPublishing: boolean;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -51,7 +56,7 @@ const saveToStorage = (key: string, data: any) => {
         localStorage.setItem(key, JSON.stringify(data));
     } catch (e: any) {
         if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
-            alert('⚠️ STORAGE FULL: The image you are trying to upload is too large or you have saved too many photos. Please try deleting some items or using smaller images.');
+            alert('⚠️ STORAGE FULL: The image you are trying to upload is too large. Please use the GitHub Storage option in Settings.');
         } else {
             console.error('Error saving to storage:', e);
         }
@@ -84,7 +89,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [siteSettings, setSiteSettings] = useState<SiteSettings>(() => {
     try {
         const saved = localStorage.getItem('mdc_settings');
-        // Merge with INITIAL_SETTINGS to ensure all keys exist even if saved data is partial
+        // Merge with INITIAL_SETTINGS to ensure all keys exist
         return saved ? { ...INITIAL_SETTINGS, ...JSON.parse(saved) } : INITIAL_SETTINGS;
     } catch { return INITIAL_SETTINGS; }
   });
@@ -109,6 +114,43 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return saved ? { ...INITIAL_AI_SETTINGS, ...JSON.parse(saved) } : INITIAL_AI_SETTINGS;
     } catch { return INITIAL_AI_SETTINGS; }
   });
+
+  const [isPublishing, setIsPublishing] = useState(false);
+
+  // --- LIVE DATA LOADING ---
+  // Attempt to fetch 'data.json' on startup. 
+  // If local storage is EMPTY (new visitor), we use the live data.
+  // If local storage HAS data (admin/returning user), we prioritize local storage.
+  useEffect(() => {
+    const loadLiveData = async () => {
+       // Check if we already have local data for a key section
+       const hasLocalData = localStorage.getItem('mdc_courses');
+       
+       if (!hasLocalData) {
+           console.log("No local data found. Fetching live data.json...");
+           try {
+               const response = await fetch('./data.json');
+               if (response.ok) {
+                   const data = await response.json();
+                   // Batch update state
+                   if (data.courses) setCourses(data.courses);
+                   if (data.students) setStudents(data.students);
+                   if (data.galleryImages) setGalleryImages(data.galleryImages);
+                   if (data.siteSettings) setSiteSettings(data.siteSettings);
+                   if (data.faculty) setFaculty(data.faculty);
+                   if (data.videos) setVideos(data.videos);
+                   if (data.aiSettings) setAiSettings(data.aiSettings);
+               } else {
+                   console.log("No data.json found, using defaults.");
+               }
+           } catch (e) {
+               console.error("Failed to load live data", e);
+           }
+       }
+    };
+    loadLiveData();
+  }, []);
+
 
   // Persist to localStorage whenever state changes
   useEffect(() => saveToStorage('mdc_courses', courses), [courses]);
@@ -178,14 +220,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const resetData = () => {
     if (window.confirm("Are you sure you want to reset all data to default? This cannot be undone.")) {
-        localStorage.removeItem('mdc_courses');
-        localStorage.removeItem('mdc_students');
-        localStorage.removeItem('mdc_gallery');
-        localStorage.removeItem('mdc_settings');
-        localStorage.removeItem('mdc_faculty');
-        localStorage.removeItem('mdc_videos');
-        localStorage.removeItem('mdc_ai_settings');
-        
+        localStorage.clear();
         setCourses(INITIAL_COURSES);
         setStudents(INITIAL_STUDENTS);
         setGalleryImages(INITIAL_GALLERY);
@@ -198,6 +233,38 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  // --- PUBLISH FUNCTION ---
+  const publishToLiveSite = async () => {
+      if (!siteSettings.githubToken || !siteSettings.githubOwner || !siteSettings.githubRepo) {
+          alert("❌ GitHub Configuration Missing!\nPlease go to 'Site Settings' > 'Cloud Storage' and fill in your GitHub Username, Repo Name, and Token.");
+          return;
+      }
+
+      if (!window.confirm("📢 Are you sure you want to PUBLISH changes?\n\nThis will overwrite the live website data. It may take 2-3 minutes for changes to appear.")) return;
+
+      setIsPublishing(true);
+      try {
+          const fullData = {
+              courses,
+              students,
+              galleryImages,
+              siteSettings,
+              faculty,
+              videos,
+              aiSettings
+          };
+          
+          // Save to 'public/data.json' in the repo
+          await saveJsonToGitHub(fullData, siteSettings.githubToken, siteSettings.githubOwner, siteSettings.githubRepo, 'public/data.json');
+          alert("✅ Published Successfully!\n\nYour changes have been sent to GitHub. Please wait a few minutes for the live site to update.");
+      } catch (e: any) {
+          console.error(e);
+          alert("❌ Publish Failed: " + e.message);
+      } finally {
+          setIsPublishing(false);
+      }
+  };
+
   return (
     <DataContext.Provider value={{ 
       courses, students, galleryImages, siteSettings, faculty, videos, aiSettings,
@@ -207,7 +274,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       updateSiteSettings, updateAISettings,
       addFaculty, updateFaculty, deleteFaculty,
       addVideo, deleteVideo,
-      resetData 
+      resetData,
+      publishToLiveSite, isPublishing
     }}>
       {children}
     </DataContext.Provider>
